@@ -1,0 +1,37 @@
+{
+  "manifest_version": 1,
+  "version": 1,
+  "type": "APP",
+  "name": {
+    "ja": "Remotty 更新通知",
+    "en": "Remotty Notification",
+    "zh": "Remotty Notification"
+  },
+  "description": {
+    "ja": "レコード更新をRemottyに通知するプラグインです。",
+    "en": "Remotty notification plugin",
+    "zh": "Remotty notification plugin"
+  },
+  "icon": "image/logo_01.png",
+  "homepage_url": {
+  },
+  "desktop": {
+    "js": [
+      "https://js.cybozu.com/jquery/1.12.3/jquery.min.js",
+      "https://wzrd.in/standalone/json2yaml",
+      "js/desktop.js"
+    ]
+  },
+  "config": {
+    "html": "html/config.html",
+    "js": [
+      "https://js.cybozu.com/jquery/1.12.3/jquery.min.js",
+      "js/config.js"
+    ],
+    "css": [
+      "css/51-us-default.css",
+      "css/config.css"
+    ],
+    "required_params": ["url"]
+  }
+}
