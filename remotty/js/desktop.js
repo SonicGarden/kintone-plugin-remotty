@@ -3,33 +3,6 @@ jQuery.noConflict();
 (function($, PLUGIN_ID) {
   "use strict";
 
-  var changeEventBase = [
-    "app.record.index.edit.change",
-    "app.record.edit.change",
-    "app.record.create.change"
-  ];
-
-  // var setNotificationEvent = function (codes) {
-  //   var changeEvents = [];
-  //   changeEventBase.forEach(function (base) {
-  //     codes.forEach(function (code) {
-  //       changeEvents.push(base + "." + code);
-  //     });
-  //   });
-  //   kintone.events.on(changeEvents, function (e) {
-  //     var code = e.type.split(".").pop();
-  //     appPromise(e.appId).then(function (app) {
-  //       var payload = {
-  //         message: "kintone " + app.name + " (appId:" + e.appId + ") の " + code + " が更新されました\n`" + e.changes.field.value + "`"
-  //       };
-  //       kintone.proxy(webhookUrl, 'POST', headers, payload).then(function (args) {
-  //         var body = args[0], status = args[1], headers = args[2];
-  //         console.log(status, body);
-  //       });
-  //     });
-  //   });
-  // };
-
   var config = kintone.plugin.app.getConfig(PLUGIN_ID);
   var webhookUrl = config.url;
   var headers = {
@@ -39,14 +12,16 @@ jQuery.noConflict();
 
   var setSubmitNotificationEvent = function () {
     var submitEvents = [
-      "app.record.index.edit.submit",
-      "app.record.edit.submit",
-      "app.record.create.submit"
+      "app.record.index.edit.submit.success",
+      "app.record.edit.submit.success",
+      "app.record.create.submit.success"
     ];
     kintone.events.on(submitEvents, function (e) {
       appPromise(e.appId).then(function (app) {
+        var eventString = (e.type.indexOf('create') !== -1) ? "作成" : "更新";
+        var recordUrl = window.location.protocol + "/" + window.location.host + "/k/" + e.appId + "/show#record=" + e.recordId;
         var payload = {
-          message: "kintone " + app.name + " appId:" + e.appId + " recordId:" + e.recordId + " が更新されました\n```" + recordToText(e.record) + "```"
+          message: "kintone " + app.name + " (appId:" + e.appId + ") のレコード " + e.recordId + " が" + eventString + "されました\n" + recordUrl + "\n```" + recordToText(e.record) + "```"
         };
         return kintone.proxy(webhookUrl, 'POST', headers, payload);
       }).then(function (args) {
