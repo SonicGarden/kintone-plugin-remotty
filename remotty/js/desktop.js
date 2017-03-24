@@ -17,11 +17,12 @@ jQuery.noConflict();
       "app.record.create.submit.success"
     ];
     kintone.events.on(submitEvents, function (e) {
-      appPromise(e.appId).then(function (app) {
+      kintone.Promise.all([appPromise(e.appId), formPromise(e.appId)]).then(function (values) {
+        var app = values[0], form = values[1];
         var eventString = (e.type.indexOf('create') !== -1) ? "作成" : "更新";
-        var recordUrl = window.location.protocol + "/" + window.location.host + "/k/" + e.appId + "/show#record=" + e.recordId;
+        var recordUrl = window.location.protocol + "//" + window.location.host + "/k/" + e.appId + "/show#record=" + e.recordId;
         var payload = {
-          message: "kintone " + app.name + " (appId:" + e.appId + ") のレコード " + e.recordId + " が" + eventString + "されました\n" + recordUrl + "\n```" + recordToText(e.record) + "```"
+          message: "kintone " + app.name + " (appId:" + e.appId + ") のレコード " + e.recordId + " が" + eventString + "されました\n" + recordUrl + "\n```" + recordToText(e.record, e.appId, form) + "```"
         };
         return kintone.proxy(webhookUrl, 'POST', headers, payload);
       }).then(function (args) {
@@ -33,9 +34,13 @@ jQuery.noConflict();
     });
   };
 
-  var recordToText = function (record) {
+  var recordToText = function (record, appId, form) {
     var values = Object.keys(record).reduce(function (obj, key) {
-      obj[key] = record[key].value;
+      var formProperty = form.properties.find(function (property) {
+        return property.code === key;
+      });
+      var label = (formProperty && formProperty.label) || key;
+      obj[label] = record[key].value;
       return obj;
     }, {});
     return json2yaml.stringify(values);
@@ -44,13 +49,16 @@ jQuery.noConflict();
   var apps = {};
   var appPromise = function (appId) {
     if (!apps[appId]) {
-      apps[appId] = kintone.api(
-        kintone.api.url("/k/v1/app", true),
-        'GET',
-        { id: appId }
-      );
+      apps[appId] = kintone.api(kintone.api.url("/k/v1/app", true), 'GET', { id: appId });
     }
     return apps[appId];
+  }
+  var forms = {};
+  var formPromise = function (appId) {
+    if (!forms[appId]) {
+      forms[appId] = kintone.api(kintone.api.url("/k/v1/form", true), 'GET', { app: appId });
+    }
+    return forms[appId];
   }
 
   setSubmitNotificationEvent();

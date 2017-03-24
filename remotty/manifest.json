@@ -18,7 +18,7 @@
   "desktop": {
     "js": [
       "https://js.cybozu.com/jquery/1.12.3/jquery.min.js",
-      "https://wzrd.in/standalone/json2yaml",
+      "js/standalone_json2yaml.js",
       "js/desktop.js"
     ]
   },
